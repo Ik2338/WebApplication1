@@ -1,0 +1,113 @@
+﻿@{
+    ViewData["Title"] = "Mon Profil";
+    ViewData["Icon"] = "fas fa-user";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-circle me-2"></i>Mon Profil
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4 text-center">
+                            <div class="avatar-circle mb-3" style="width: 120px; height: 120px; margin: 0 auto; background: #f8f9fa; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user fa-4x text-secondary"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h3>@ViewBag.Username</h3>
+                            <div class="mb-3">
+                                @{
+                                    var roleBadgeClass = ViewBag.Role switch
+                                    {
+                                        "Admin" => "bg-warning",
+                                        "Manager" => "bg-info",
+                                        _ => "bg-secondary"
+                                    };
+
+                                    var roleIcon = ViewBag.Role switch
+                                    {
+                                        "Admin" => "fas fa-crown",
+                                        "Manager" => "fas fa-user-shield",
+                                        _ => "fas fa-user"
+                                    };
+                                }
+                                <span class="badge @roleBadgeClass p-2">
+                                    <i class="@roleIcon me-1"></i>
+                                    @ViewBag.Role
+                                </span>
+                            </div>
+                            <p class="text-muted">
+                                Connecté via le système d'authentification
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-info-circle text-primary me-2"></i>Informations</h5>
+                                    <ul class="list-unstyled mt-3">
+                                        <li class="mb-2">
+                                            <strong><i class="fas fa-user me-2"></i>Nom d'utilisateur :</strong> @ViewBag.Username
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong><i class="fas fa-user-tag me-2"></i>Rôle :</strong> @ViewBag.Role
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong><i class="fas fa-sign-in-alt me-2"></i>Statut :</strong>
+                                            <span class="text-success">
+                                                <i class="fas fa-circle me-1"></i>Connecté
+                                            </span>
+                                        </li>
+                                        <li>
+                                            <strong><i class="fas fa-calendar-alt me-2"></i>Dernière connexion :</strong>
+                                            <span class="text-muted">Aujourd'hui à @DateTime.Now.ToString("HH:mm")</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-cog text-primary me-2"></i>Actions</h5>
+                                    <div class="mt-3 d-flex flex-column gap-2">
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="w-100">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-danger w-100">
+                                                <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
+                                            </button>
+                                        </form>
+                                        <a href="/" class="btn btn-outline-primary w-100">
+                                            <i class="fas fa-home me-1"></i>Retour à l'accueil
+                                        </a>
+                                        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                                        {
+                                            <a asp-controller="Admin" asp-action="Index" class="btn btn-primary w-100">
+                                                <i class="fas fa-lock me-1"></i>Administration
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>
+                        <i class="fas fa-info-circle me-1"></i>
+                        Votre session expirera après 7 jours d'inactivité
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

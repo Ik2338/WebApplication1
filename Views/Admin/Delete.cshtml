@@ -1,0 +1,73 @@
+﻿@model WebApplication1.Models.Produit
+@{
+    ViewData["Title"] = "Supprimer le Produit";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>@ViewData["Title"]
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h5 class="alert-heading">Attention !</h5>
+                        <p class="mb-0">Vous êtes sur le point de supprimer définitivement ce produit. Cette action est irréversible.</p>
+                    </div>
+
+                    <h5 class="text-center mb-4">Êtes-vous sûr de vouloir supprimer :</h5>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 text-center">
+                                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                                    {
+                                        <img src="@Model.ImageUrl" alt="@Model.Nom" class="img-fluid rounded" style="max-height: 150px;">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 150px;">
+                                            <i class="fas fa-box fa-3x text-muted"></i>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-md-8">
+                                    <h5 class="card-title">@Model.Nom</h5>
+                                    <p class="card-text text-muted">@Model.Description</p>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="badge bg-secondary">@Model.Categorie</span>
+                                        <span class="fw-bold text-success">@Model.Prix.ToString("C")</span>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-box me-1"></i>Stock: @Model.Quantite |
+                                            <i class="fas fa-calendar me-1 ms-2"></i>Créé le: @Model.DateCreation.ToString("dd/MM/yyyy")
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Non, annuler
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Oui, supprimer définitivement
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

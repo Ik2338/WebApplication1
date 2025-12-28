@@ -1,0 +1,94 @@
+﻿@model WebApplication1.Models.Produit
+@{
+    ViewData["Title"] = "Détails du Produit";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>@ViewData["Title"]
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Image -->
+                        <div class="col-md-5 text-center mb-4 mb-md-0">
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <img src="@Model.ImageUrl" alt="@Model.Nom" class="img-fluid rounded shadow" style="max-height: 300px;">
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 250px;">
+                                    <i class="fas fa-box fa-5x text-muted"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Détails -->
+                        <div class="col-md-7">
+                            <h2 class="mb-3">@Model.Nom</h2>
+
+                            <div class="mb-4">
+                                <span class="badge bg-secondary fs-6">@Model.Categorie</span>
+                            </div>
+
+                            <div class="mb-4">
+                                <h4 class="text-success">@Model.Prix.ToString("C")</h4>
+                            </div>
+
+                            <div class="mb-4">
+                                <h5>Description</h5>
+                                <p class="text-muted">@Model.Description</p>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-muted">Stock</h6>
+                                            <h3 class="@(Model.Quantite > 0 ? "text-success" : "text-danger")">
+                                                @Model.Quantite
+                                            </h3>
+                                            <span class="badge @(Model.Quantite > 0 ? "bg-success" : "bg-danger")">
+                                                @(Model.Quantite > 0 ? "Disponible" : "Rupture")
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-muted">Date création</h6>
+                                            <h5>@Model.DateCreation.ToString("dd/MM/yyyy")</h5>
+                                            <small class="text-muted">@Model.DateCreation.ToString("HH:mm")</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex justify-content-between mt-4 pt-4 border-top">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                        </a>
+                        <div>
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">
+                                <i class="fas fa-edit me-2"></i>Modifier
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Supprimer
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,55 @@
+﻿@model WebApplication1.Models.Produit
+
+@{
+    ViewData["Title"] = Model.Nom;
+}
+
+<div class="container mt-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Boutique</a></li>
+            <li class="breadcrumb-item active">@Model.Nom</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm border-0">
+        <div class="row g-0">
+            <div class="col-md-6">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" class="img-fluid rounded-start w-100" alt="@Model.Nom">
+                }
+                else
+                {
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                        <i class="fas fa-box fa-6x text-muted"></i>
+                    </div>
+                }
+            </div>
+            <div class="col-md-6">
+                <div class="card-body p-4">
+                    <span class="badge bg-primary mb-2">@Model.Categorie</span>
+                    <h1 class="display-5 fw-bold">@Model.Nom</h1>
+                    <p class="text-success h2 mb-4">@Model.Prix.ToString("C")</p>
+
+                    <hr />
+
+                    <h5>Description</h5>
+                    <p class="text-muted">@Model.Description</p>
+
+                    <div class="mt-4">
+                        <p><strong>Stock disponible :</strong> @Model.Quantite unités</p>
+                        <p><strong>Ajouté le :</strong> @Model.DateCreation.ToShortDateString()</p>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-5">
+                        <button class="btn btn-primary btn-lg">
+                            <i class="fas fa-cart-plus me-2"></i>Ajouter au panier
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Retour à la liste</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

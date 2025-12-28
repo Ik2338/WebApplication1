@@ -1,0 +1,74 @@
+﻿@model string
+
+@{
+    ViewData["Title"] = "Connexion";
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="text-center mb-0">Espace Sécurisé</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Login" asp-route-returnUrl="@returnUrl" method="post">
+
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger shadow-sm">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                @Html.ValidationSummary(true, "")
+                            </div>
+                        }
+
+                        <div class="form-group mb-3">
+                            <label for="username" class="form-label fw-bold">Nom d'utilisateur</label>
+                            <input type="text"
+                                   class="form-control form-control-lg"
+                                   id="username"
+                                   name="username"
+                                   placeholder="Entrez votre identifiant"
+                                   required
+                                   autofocus />
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label for="password" class="form-label fw-bold">Mot de passe</label>
+                            <input type="password"
+                                   class="form-control form-control-lg"
+                                   id="password"
+                                   name="password"
+                                   placeholder="Entrer votre mot de passe "
+                                   required />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Se connecter
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr />
+
+                    @* <div class="mt-4 p-3 bg-light rounded border">
+                        <h6 class="text-primary"><i class="bi bi-info-circle me-2"></i>Comptes de test :</h6>
+                        <ul class="list-unstyled mb-0 small text-muted">
+                            <li><strong>Admin :</strong> admin / <code class="user-select-all">admin123</code></li>
+                            <li><strong>Manager :</strong> manager / <code class="user-select-all">manager123</code></li>
+                            <li><strong>User :</strong> user / <code class="user-select-all">user123</code></li>
+                        </ul>
+                    </div> *@
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">
+                    <i class="bi bi-arrow-left"></i> Retour à la boutique
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

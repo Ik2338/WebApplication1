@@ -1,0 +1,925 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Ma Boutique</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #858796;
+            --success-color: #1cc88a;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --info-color: #36b9cc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fc;
+            color: #333;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .navbar {
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .navbar-light .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+            .navbar-light .navbar-nav .nav-link:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: white;
+            }
+
+            .navbar-light .navbar-nav .nav-link.active {
+                background-color: rgba(255, 255, 255, 0.2);
+                color: white;
+            }
+
+        .footer {
+            background-color: #fff;
+            border-top: 1px solid #e3e6f0;
+            box-shadow: 0 -0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            margin-top: auto;
+        }
+
+        .alert {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0.15rem 0.5rem rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            transition: all 0.3s;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 0.35rem 1.75rem 0 rgba(58, 59, 69, 0.2);
+            }
+
+        .badge {
+            font-weight: 500;
+            padding: 0.35em 0.65em;
+        }
+
+        .page-title {
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4rem 0;
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 3rem;
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            border-radius: 10px;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+        }
+
+            .dropdown-item:hover {
+                background-color: #f8f9fc;
+            }
+
+        .dropdown-divider {
+            margin: 0.5rem 0;
+        }
+
+        .container {
+            max-width: 1200px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Icône panier avec compteur */
+        .cart-icon {
+            position: relative;
+            display: inline-block;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            display: none;
+        }
+
+        /* Styles pour le modal panier */
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .cart-total {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--success-color);
+        }
+
+        .cart-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+
+            .cart-item:last-child {
+                border-bottom: none;
+            }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        /* Bouton panier */
+        .panier-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin-right: 10px;
+        }
+
+            .panier-btn:hover {
+                background: rgba(255, 255, 255, 0.25);
+            }
+
+        @@media (max-width: 768px) {
+            .hero-section {
+                padding: 2rem 0;
+                border-radius: 0 0 20px 20px;
+            }
+
+            .navbar-nav {
+                padding: 1rem 0;
+            }
+
+            .navbar-light .navbar-nav .nav-link {
+                margin: 0.25rem 0;
+            }
+
+            .cart-count {
+                top: -5px;
+                right: -5px;
+                width: 18px;
+                height: 18px;
+                font-size: 10px;
+            }
+        }
+    </style>
+
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    @{
+        // 1. Détection précise de la page pour la logique d'affichage
+        var controller = ViewContext.RouteData.Values["Controller"]?.ToString();
+        var action = ViewContext.RouteData.Values["Action"]?.ToString();
+        var isAdminArea = controller == "Admin";
+        var isLoginPage = (controller == "Account" && action == "Login");
+    }
+
+    @if (!isLoginPage)
+    {
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <a class="navbar-brand text-white" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-store me-2"></i>MaBoutique
+                </a>
+
+                @if (isAdminArea)
+                {
+                    <div class="ms-auto">
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm">
+                                <i class="fas fa-sign-out-alt me-1"></i>Déconnexion Admin
+                            </button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                        <span class="navbar-toggler-icon text-white"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navbarMain">
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link @(controller == "Home" && action == "Index" ? "active" : "")"
+                                   asp-controller="Home" asp-action="Index">
+                                    <i class="fas fa-home me-1"></i>Accueil
+                                </a>
+                            </li>
+                        </ul>
+
+                        <ul class="navbar-nav align-items-center">
+                            <li class="nav-item me-2">
+                                <a class="nav-link cart-icon panier-btn" href="javascript:void(0)" onclick="ouvrirPanier()">
+                                    <i class="fas fa-shopping-cart me-1"></i>Panier
+                                    <span class="cart-count">0</span>
+                                </a>
+                            </li>
+
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <div class="user-avatar me-2 bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                            <i class="fas fa-user text-white" style="font-size: 0.9rem;"></i>
+                                        </div>
+                                        <span>@User.Identity.Name</span>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                        <li><span class="dropdown-header text-uppercase small fw-bold"><i class="fas fa-id-badge me-2"></i>Mon Compte</span></li>
+
+                                        <li class="px-3 py-1">
+                                            @if (User.IsInRole("Admin"))
+                                            {
+                                                <span class="badge bg-warning text-dark w-100"><i class="fas fa-crown me-1"></i> Administrateur</span>
+                                            }
+                                            else if (User.IsInRole("Manager"))
+                                            {
+
+                                                <span class="badge bg-info text-dark w-100"><i class="fas fa-user-shield me-1"></i> Manager</span>
+                                            }
+                                            else
+                                            {
+
+                                                <span class="badge bg-light text-secondary w-100 border text-dark"><i class="fas fa-user me-1"></i> Utilisateur</span>
+                                            }
+                                        </li>
+
+                                        <li><hr class="dropdown-divider"></li>
+
+                                        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                                        {
+                                            <li>
+                                                <a class="dropdown-item fw-bold text-primary" asp-controller="Admin" asp-action="Index">
+                                                    <i class="fas fa-tachometer-alt me-2"></i>Tableau de bord
+                                                </a>
+                                            </li>
+                                        }
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                                                <i class="fas fa-user-circle me-2"></i>Mon profil
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="dropdown-item text-danger">
+                                                    <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="btn btn-outline-primary rounded-pill px-4 shadow-sm" asp-controller="Account" asp-action="Login">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Connexion
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+        </nav>
+    }
+
+    <main role="main" class="pb-3 @(isLoginPage ? "d-flex align-items-center min-vh-100" : "")">
+        <div class="container">
+
+            @foreach (var type in new[] { "Success", "Error", "Info", "Warning" })
+            {
+                if (TempData[type + "Message"] != null)
+                {
+                    var alertClass = type.ToLower() == "error" ? "danger" : type.ToLower();
+                    var iconClass = type == "Success" ? "check-circle" : (type == "Error" ? "exclamation-triangle" : (type == "Info" ? "info-circle" : "exclamation-circle"));
+
+                    <div class="alert alert-@alertClass alert-dismissible fade show mt-3 shadow-sm" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-@iconClass fa-2x me-3"></i>
+                            <div>
+                                <h5 class="alert-heading mb-1">@type !</h5>
+                                <p class="mb-0">@TempData[type + "Message"]</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+            }
+
+            @if (ViewData["Title"] != null && ViewData["Title"].ToString() != "Accueil" && !isLoginPage)
+            {
+                <h1 class="page-title mt-4 mb-4">
+                    <i class="@(ViewData["Icon"] != null ? ViewData["Icon"] : "fas fa-file-alt") me-2 text-primary"></i>
+                    @ViewData["Title"]
+                </h1>
+            }
+
+            @RenderBody()
+        </div>
+    </main>
+
+    
+    <!-- Footer -->
+    <footer class="footer mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5 class="fw-bold text-primary mb-3">
+                        <i class="fas fa-store me-2"></i>MaBoutique
+                    </h5>
+                    <p class="text-muted">
+                        Votre boutique en ligne préférée. Nous offrons les meilleurs produits au meilleur prix.
+                    </p>
+                    <div class="social-links mt-3">
+                        <a href="#" class="text-primary me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                        <a href="#" class="text-primary me-3"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" class="text-primary me-3"><i class="fab fa-instagram fa-lg"></i></a>
+                        <a href="#" class="text-primary"><i class="fab fa-linkedin fa-lg"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h6 class="fw-bold mb-3">Liens rapides</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a asp-controller="Home" asp-action="Index" class="text-muted text-decoration-none"><i class="fas fa-chevron-right me-2"></i>Accueil</a></li>
+                        <li class="mb-2"><a href="javascript:void(0)" onclick="ouvrirPanier()" class="text-muted text-decoration-none"><i class="fas fa-chevron-right me-2"></i>Mon panier</a></li>
+
+                        @{
+                            var footerUser = HttpContextAccessor.HttpContext?.User;
+                            var footerIsAuth = footerUser?.Identity?.IsAuthenticated ?? false;
+                            var footerIsAdmin = footerUser?.IsInRole("Admin") ?? false;
+                            var footerIsManager = footerUser?.IsInRole("Manager") ?? false;
+                        }
+
+                        @if (footerIsAuth)
+                        {
+                            <li class="mb-2"><a asp-controller="Account" asp-action="Profile" class="text-muted text-decoration-none"><i class="fas fa-chevron-right me-2"></i>Mon profil</a></li>
+
+                            @if (footerIsAdmin || footerIsManager)
+                            {
+                                <li class="mb-2"><a asp-controller="Admin" asp-action="Index" class="text-muted text-decoration-none"><i class="fas fa-chevron-right me-2"></i>Administration</a></li>
+                            }
+
+                            <li class="mb-2">
+                                <form class="form-inline d-inline" asp-controller="Account" asp-action="Logout" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-link text-muted text-decoration-none p-0">
+                                        <i class="fas fa-chevron-right me-2"></i>Déconnexion
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="mb-2"><a asp-controller="Account" asp-action="Login" class="text-muted text-decoration-none"><i class="fas fa-chevron-right me-2"></i>Connexion</a></li>
+                        }
+                    </ul>
+                </div>
+
+                <div class="col-lg-4">
+                    <h6 class="fw-bold mb-3">Contact</h6>
+                    <ul class="list-unstyled text-muted">
+                        <li class="mb-2">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-phone me-2"></i>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-envelope me-2"></i>
+                        </li>
+                        <li>
+                            <i class="fas fa-clock me-2"></i>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="text-muted mb-0">
+                        &copy; @DateTime.Now.Year MaBoutique. Tous droits réservés.
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="text-muted mb-0">
+                        Développé avec <i class="fas fa-heart text-danger"></i> par l'équipe MaBoutique
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // ============================================
+        // FONCTIONS UTILITAIRES
+        // ============================================
+
+        // Fonction pour nettoyer et convertir le prix
+        function convertirPrix(prix) {
+            console.log('Conversion prix:', prix, 'Type:', typeof prix);
+
+            // Si c'est déjà un nombre
+            if (typeof prix === 'number') {
+                return prix;
+            }
+
+            // Si c'est une chaîne
+            if (typeof prix === 'string') {
+                // Nettoyer la chaîne
+                let prixNettoye = prix.toString().trim();
+
+                // Remplacer la virgule par un point (format français)
+                prixNettoye = prixNettoye.replace(',', '.');
+
+                // Supprimer tout ce qui n'est pas chiffre, point ou moins
+                prixNettoye = prixNettoye.replace(/[^\d.-]/g, '');
+
+                // Convertir en nombre
+                const nombre = parseFloat(prixNettoye);
+
+                // Vérifier si c'est un nombre valide
+                if (isNaN(nombre)) {
+                    console.error('Prix non valide:', prix, '→', prixNettoye);
+                    return 0;
+                }
+
+                return nombre;
+            }
+
+            // Pour les autres cas
+            console.warn('Type de prix inattendu:', typeof prix, prix);
+            return 0;
+        }
+
+        // ============================================
+        // FONCTIONS DU PANIER
+        // ============================================
+
+        // 1. Fonction pour ajouter au panier
+        function ajouterAuPanier(id, nom, prix) {
+            console.log('=== AJOUT AU PANIER ===');
+            console.log('ID:', id, 'Nom:', nom, 'Prix reçu:', prix, 'Type:', typeof prix);
+
+            let panier = JSON.parse(localStorage.getItem('panier')) || [];
+
+            // CONVERTIR le prix EN NOMBRE
+            const prixConverti = convertirPrix(prix);
+            console.log('Prix converti:', prixConverti, 'Type:', typeof prixConverti);
+
+            // Vérifier si le produit existe déjà
+            const index = panier.findIndex(item => item.id === id);
+
+            if (index !== -1) {
+                // Produit déjà dans le panier → augmenter la quantité
+                panier[index].quantite++;
+                console.log('Quantité augmentée pour:', nom);
+            } else {
+                // Nouveau produit
+                panier.push({
+                    id: id,
+                    nom: nom,
+                    prix: prixConverti, // ← PRIX CONVERTI EN NOMBRE
+                    quantite: 1,
+                    dateAjout: new Date().toISOString()
+                });
+                console.log('Nouveau produit ajouté:', nom);
+            }
+
+            // Sauvegarder
+            localStorage.setItem('panier', JSON.stringify(panier));
+
+            // Vérifier ce qui a été sauvegardé
+            const panierVerif = JSON.parse(localStorage.getItem('panier'));
+            console.log('Panier sauvegardé:', panierVerif);
+
+            // Mettre à jour l'interface
+            updateCartCount();
+            showNotification(`${nom} ajouté au panier !`, 'success');
+
+            return false;
+        }
+
+        // 2. Fonction pour ouvrir le panier
+        function ouvrirPanier() {
+            console.log('=== OUVERTURE PANIER ===');
+
+            const panier = JSON.parse(localStorage.getItem('panier')) || [];
+            console.log('Panier chargé:', panier);
+
+            if (panier.length === 0) {
+                showNotification('Votre panier est vide !', 'info');
+                return;
+            }
+
+            // VÉRIFIER les types de prix AVANT d'afficher
+            panier.forEach((item, index) => {
+                console.log(`Produit ${index + 1}:`, {
+                    nom: item.nom,
+                    prix: item.prix,
+                    type: typeof item.prix,
+                    isNumber: typeof item.prix === 'number',
+                    hasToFixed: typeof item.prix === 'number' && typeof item.prix.toFixed === 'function'
+                });
+
+                // Si le prix n'est pas un nombre, le convertir
+                if (typeof item.prix !== 'number') {
+                    console.warn('Prix non numérique détecté, conversion...');
+                    item.prix = convertirPrix(item.prix);
+                }
+            });
+
+            // Calculer le total
+            const total = panier.reduce((sum, item) => {
+                // S'assurer que le prix est un nombre
+                const prix = typeof item.prix === 'number' ? item.prix : convertirPrix(item.prix);
+                return sum + (prix * item.quantite);
+            }, 0);
+
+            const totalArticles = panier.reduce((sum, item) => sum + item.quantite, 0);
+
+            // Créer le HTML du modal
+            let html = `
+                <div class="modal fade" id="panierModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-shopping-cart me-2"></i>Mon Panier (${totalArticles} article${totalArticles > 1 ? 's' : ''})
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Produit</th>
+                                                <th>Prix unitaire</th>
+                                                <th>Quantité</th>
+                                                <th>Total</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+            `;
+
+            panier.forEach(item => {
+                // S'assurer que le prix est un nombre
+                const prix = typeof item.prix === 'number' ? item.prix : convertirPrix(item.prix);
+                const itemTotal = prix * item.quantite;
+
+                html += `
+                    <tr class="cart-item">
+                        <td>
+                            <strong>${item.nom}</strong>
+                            <br>
+                            <small class="text-muted">ID: ${item.id}</small>
+                        </td>
+                        <td>${prix.toFixed(2)} €</td>
+                        <td>
+                            <div class="quantity-controls">
+                                <button class="btn btn-sm btn-outline-secondary quantity-btn"
+                                        onclick="modifierQuantite(${item.id}, -1)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="mx-2">${item.quantite}</span>
+                                <button class="btn btn-sm btn-outline-secondary quantity-btn"
+                                        onclick="modifierQuantite(${item.id}, 1)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </td>
+                        <td><strong>${itemTotal.toFixed(2)} €</strong></td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="supprimerDuPanier(${item.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mt-4 p-3 bg-light rounded">
+                                    <h5 class="mb-0">Total :</h5>
+                                    <h4 class="mb-0 cart-total">${total.toFixed(2)} €</h4>
+                                </div>
+
+                                <div class="alert alert-info mt-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Le panier est sauvegardé dans votre navigateur.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>Fermer
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="viderPanier()">
+                                    <i class="fas fa-trash me-2"></i>Vider le panier
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="passerCommande()">
+                                    <i class="fas fa-credit-card me-2"></i>Passer commande
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Ajouter et ouvrir le modal
+            $('body').append(html);
+            const modal = new bootstrap.Modal(document.getElementById('panierModal'));
+            modal.show();
+
+            // Nettoyer après fermeture
+            $('#panierModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        }
+
+        // 3. Fonction pour nettoyer le localStorage (en cas de données corrompues)
+        function reparerPanier() {
+            console.log('=== RÉPARATION DU PANIER ===');
+            const panier = JSON.parse(localStorage.getItem('panier')) || [];
+
+            const panierRepare = panier.map(item => {
+                return {
+                    ...item,
+                    prix: convertirPrix(item.prix) // Convertir tous les prix
+                };
+            });
+
+            localStorage.setItem('panier', JSON.stringify(panierRepare));
+            console.log('Panier réparé:', panierRepare);
+            // showNotification('Panier réparé avec succès !', 'success');
+        }
+
+        // 4. Autres fonctions du panier
+        function modifierQuantite(productId, delta) {
+            let panier = JSON.parse(localStorage.getItem('panier')) || [];
+            const item = panier.find(item => item.id === productId);
+
+            if (item) {
+                item.quantite += delta;
+
+                if (item.quantite <= 0) {
+                    panier = panier.filter(item => item.id !== productId);
+                    showNotification('Produit retiré du panier', 'warning');
+                }
+
+                localStorage.setItem('panier', JSON.stringify(panier));
+                updateCartCount();
+
+                if ($('#panierModal').length > 0) {
+                    $('.modal').modal('hide');
+                    setTimeout(() => ouvrirPanier(), 300);
+                }
+            }
+        }
+
+        function supprimerDuPanier(productId) {
+            let panier = JSON.parse(localStorage.getItem('panier')) || [];
+            const item = panier.find(item => item.id === productId);
+
+            if (item && confirm(`Supprimer "${item.nom}" du panier ?`)) {
+                panier = panier.filter(item => item.id !== productId);
+                localStorage.setItem('panier', JSON.stringify(panier));
+                updateCartCount();
+                showNotification(`${item.nom} supprimé du panier`, 'warning');
+
+                if ($('#panierModal').length > 0) {
+                    $('.modal').modal('hide');
+                    setTimeout(() => ouvrirPanier(), 300);
+                }
+            }
+        }
+
+        function viderPanier() {
+            const panier = JSON.parse(localStorage.getItem('panier')) || [];
+
+            if (panier.length === 0) {
+                showNotification('Le panier est déjà vide', 'info');
+                return;
+            }
+
+            if (confirm(`Vider tout le panier (${panier.reduce((sum, item) => sum + item.quantite, 0)} articles) ?`)) {
+                localStorage.removeItem('panier');
+                updateCartCount();
+                showNotification('Panier vidé', 'success');
+                $('.modal').modal('hide');
+            }
+        }
+
+        function passerCommande() {
+            const panier = JSON.parse(localStorage.getItem('panier')) || [];
+
+            if (panier.length === 0) {
+                showNotification('Votre panier est vide !', 'warning');
+                return;
+            }
+
+            const total = panier.reduce((sum, item) => {
+                const prix = typeof item.prix === 'number' ? item.prix : convertirPrix(item.prix);
+                return sum + (prix * item.quantite);
+            }, 0);
+
+            alert(`Commande simulée pour ${total.toFixed(2)} € !\n\nCette fonctionnalité est en cours de développement.`);
+        }
+
+        function updateCartCount() {
+            const panier = JSON.parse(localStorage.getItem('panier')) || [];
+            const totalItems = panier.reduce((sum, item) => sum + item.quantite, 0);
+            const cartCount = $('.cart-count');
+
+            cartCount.text(totalItems);
+
+            if (totalItems > 0) {
+                cartCount.show();
+            } else {
+                cartCount.hide();
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const bgColor = type === 'success' ? 'bg-success' :
+                          type === 'warning' ? 'bg-warning' :
+                          type === 'info' ? 'bg-info' : 'bg-danger';
+
+            const toastId = 'toast-' + Date.now();
+            const toast = $(`
+                <div id="${toastId}" class="toast align-items-center text-white ${bgColor} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="fas ${type === 'success' ? 'fa-check-circle' :
+                                         type === 'warning' ? 'fa-exclamation-triangle' :
+                                         type === 'info' ? 'fa-info-circle' : 'fa-times-circle'} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `);
+
+            $('.toast-container').append(toast);
+            const bsToast = new bootstrap.Toast(toast[0], { delay: 3000 });
+            bsToast.show();
+
+            toast.on('hidden.bs.toast', function () {
+                $(this).remove();
+            });
+        }
+
+            // ============================================
+        // 3. CORRECTION ET AMÉLIORATION DÉCONNEXION
+        // ============================================
+        function confirmerDeconnexion(event) {
+            event.preventDefault(); // Stoppe l'envoi immédiat
+            const form = event.currentTarget.closest('form') || event.target;
+
+            Swal.fire({
+                title: 'Déconnexion',
+                text: "Voulez-vous vraiment vous déconnecter ?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545', // Rouge (danger)
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-sign-out-alt"></i> Oui, déconnexion',
+                cancelButtonText: 'Annuler',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit(); // Envoie le formulaire si validé
+                }
+            });
+        }
+
+        // ============================================
+        // 4. INITIALISATION AU CHARGEMENT
+        // ============================================
+        $(document).ready(function() {
+            updateCartCount();
+
+            // Applique la confirmation à TOUS les formulaires de déconnexion
+            // (Admin et Public)
+            $('form[action*="Logout"]').on('submit', function(e) {
+                confirmerDeconnexion(e);
+            });
+
+            // Gestion de l'état actif des liens nav
+            var currentUrl = window.location.pathname;
+            $('.navbar-nav .nav-link').each(function() {
+                var linkUrl = $(this).attr('href');
+                if (linkUrl && (currentUrl === linkUrl || currentUrl.startsWith(linkUrl + '/'))) {
+                    $(this).addClass('active');
+                }
+            });
+
+            // Auto-fermeture des alertes de succès ASP.NET
+            setTimeout(() => { $('.alert-dismissible').fadeOut(); }, 5000);
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

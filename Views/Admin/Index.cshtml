@@ -1,0 +1,200 @@
+﻿@model List<WebApplication1.Models.Produit>
+@{
+    ViewData["Title"] = "Admin - Gestion des Produits";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid px-4 mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-gray-800">
+                <i class="fas fa-tachometer-alt text-primary me-2"></i>Tableau de Bord Admin
+            </h1>
+            <p class="text-muted mb-0">Gérez votre inventaire de produits</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="fas fa-plus-circle me-2"></i>Nouveau Produit
+        </a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Produits</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Count</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-box fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Stock Faible</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Count(p => p.Quantite > 0 && p.Quantite <= 5)</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">En Rupture</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Count(p => p.Quantite == 0)</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-times-circle fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Valeur Stock</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Sum(p => p.Prix * p.Quantite).ToString("C")</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-dollar-sign fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center bg-white">
+            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-table me-2"></i>Liste des Produits</h6>
+            <div>
+                <button class="btn btn-sm btn-outline-primary me-2" id="exportBtn"><i class="fas fa-file-export me-1"></i>Exporter</button>
+                <button class="btn btn-sm btn-outline-secondary" id="printBtn"><i class="fas fa-print me-1"></i>Imprimer</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom</th>
+                            <th>Catégorie</th>
+                            <th>Prix</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var produit in Model.OrderByDescending(p => p.DateCreation))
+                        {
+                            <tr>
+                                <td>@produit.Id</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        @if (!string.IsNullOrEmpty(produit.ImageUrl))
+                                        {
+                                            <img src="@produit.ImageUrl" class="rounded me-2" style="width: 35px; height: 35px; object-fit: cover;">
+                                        }
+                                        <strong>@produit.Nom</strong>
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-light text-dark border">@produit.Categorie</span></td>
+                                <td class="fw-bold">@produit.Prix.ToString("C")</td>
+                                <td>
+                                    @if (produit.Quantite > 5)
+                                    {
+                                        <span class="badge bg-success-soft text-success">@produit.Quantite</span>
+                                    }
+                                    else if (produit.Quantite > 0)
+                                    {
+
+                                        <span class="badge bg-warning text-dark">@produit.Quantite</span>
+                                    }
+                                    else
+                                    {
+
+                                        <span class="badge bg-danger">Rupture</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Edit" asp-route-id="@produit.Id" class="btn btn-warning"><i class="fas fa-edit"></i></a>
+                                        <a asp-action="Delete" asp-route-id="@produit.Id" class="btn btn-danger btn-delete-confirm"><i class="fas fa-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function() {
+            // 1. BOUTONS EXPORT ET PRINT
+            $('#exportBtn').click(function() { exportToCSV(); });
+            $('#printBtn').click(function() { window.print(); });
+
+            // 2. SUPPRESSION STYLISÉE (CORRECTION FAUTE)
+            $('.btn-delete-confirm').on('click', function(e) {
+                e.preventDefault();
+                const url = $(this).attr('href');
+
+                Swal.fire({
+                    title: 'Supprimer ce produit ?',
+                    text: "Cette action est irréversible !",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e74a3b',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Oui, supprimer',
+                    cancelButtonText: 'Annuler',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = url;
+                    }
+                });
+            });
+
+            // 3. AUTO-HIDE ALERTES
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+
+            function exportToCSV() {
+                let csv = [];
+                let rows = document.querySelectorAll("#dataTable tr");
+                for (let i = 0; i < rows.length; i++) {
+                    let row = [], cols = rows[i].querySelectorAll("td, th");
+                    for (let j = 0; j < cols.length; j++) {
+                        let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, "").replace(/(\s\s)/gm, " ");
+                        row.push('"' + text + '"');
+                    }
+                    csv.push(row.join(","));
+                }
+                let csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+                let downloadLink = document.createElement("a");
+                downloadLink.download = "export_produits.csv";
+                downloadLink.href = window.URL.createObjectURL(csvFile);
+                downloadLink.click();
+            }
+        });
+    </script>
+}
