@@ -83,6 +83,76 @@
                 transform: translateY(-2px);
                 box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
             }
+            
+        /* --- Style du Chatbot MaBoutique --- */
+
+        /* La bulle flottante avec animation */
+        #chat-bubble {
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #6f42c1 0%, #a259ff 100%) !important;
+        }
+
+            #chat-bubble:hover {
+                transform: scale(1.1) rotate(10deg);
+            }
+
+        /* Fenêtre de chat */
+        #chat-window {
+            border: none !important;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Zone des messages */
+        #chat-content {
+            background-color: #f8f9fa;
+            scrollbar-width: thin;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Bulles de message */
+        .msg-ia {
+            background: #e9ecef;
+            color: #333;
+            padding: 8px 12px;
+            border-radius: 15px 15px 15px 0;
+            margin-bottom: 10px;
+            align-self: flex-start;
+            max-width: 85%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .msg-user {
+            background: #6f42c1;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 15px 15px 0 15px;
+            margin-bottom: 10px;
+            align-self: flex-end;
+            max-width: 85%;
+            box-shadow: 0 2px 5px rgba(111, 66, 193, 0.2);
+        }
+
+        /* Animation de chargement (typing) */
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background-color: #6f42c1;
+            display: inline-block;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        @@keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1.0);
+            }
+        }
+
 
         .card {
             border: none;
@@ -295,9 +365,32 @@
 
                         <ul class="navbar-nav align-items-center">
                             <li class="nav-item me-2">
-                                <a class="nav-link cart-icon panier-btn" href="javascript:void(0)" onclick="ouvrirPanier()">
-                                    <i class="fas fa-shopping-cart me-1"></i>Panier
-                                    <span class="cart-count">0</span>
+                                @using System.Text.Json
+                        @using WebApplication1.ViewModels
+                        <a class="nav-link cart-icon" asp-controller="Panier" asp-action="Index">
+                            <i class="fas fa-shopping-cart me-1"></i>Panier
+                            @{
+                                        var panierJson = Context.Session.GetString("Panier");
+                                        var itemsCount = 0;
+
+                                        if (!string.IsNullOrEmpty(panierJson))
+                                        {
+                                            try
+                                            {
+                                                var panierItems = JsonSerializer.Deserialize<List<PanierItemViewModel>>(panierJson);
+                                                itemsCount = panierItems?.Sum(item => item.Quantite) ?? 0;
+                                            }
+                                            catch
+                                            {
+                                                itemsCount = 0;
+                                            }
+                                        }
+
+                                        if (itemsCount > 0)
+                                        {
+                                            <span class="badge bg-danger rounded-pill ms-1">@itemsCount</span>
+                                        }
+                                    }
                                 </a>
                             </li>
 
@@ -548,6 +641,33 @@
             return 0;
         }
 
+/// CHAT
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const content = document.getElementById('chat-content');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            content.innerHTML += `<div class="mb-2 text-end text-primary"><strong>Vous:</strong> ${message}</div>`;
+            input.value = '';
+
+            try {
+                const response = await fetch('/api/chat/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+                const data = await response.json();
+
+                content.innerHTML += `<div class="mb-2"><strong>IA:</strong> ${data.reply}</div>`;
+                content.scrollTop = content.scrollHeight;
+            } catch (e) {
+                content.innerHTML += `<div class="text-danger">Erreur de connexion.</div>`;
+            }
+        }
+
+        /////////FIN CHAT
         // ============================================
         // FONCTIONS DU PANIER
         // ============================================

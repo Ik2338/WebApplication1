@@ -154,10 +154,15 @@ else
                                 
                                 <!-- Boutons CLIENT uniquement -->
                                 <div class="d-grid gap-2">
-                                    <button class="btn btn-primary"
-                                            onclick="ajouterAuPanier(@produit.Id, '@Html.Raw(produit.Nom.Replace("'", "\\'"))', '@produit.Prix.ToString().Replace(",", ".")')">
-                                        <i class="fas fa-cart-plus me-2"></i>Ajouter au panier
-                                    </button>
+                                    <form method="post" asp-controller="Panier" asp-action="Ajouter" class="d-inline w-100">
+                                        <input type="hidden" name="produitId" value="@produit.Id" />
+                                        <input type="hidden" name="nom" value="@produit.Nom" />
+                                        <input type="hidden" name="prix" value="@produit.Prix" />
+                                        <input type="hidden" name="quantite" value="1" />
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-cart-plus me-2"></i>Ajouter au panier
+                                        </button>
+                                    </form>
                                     <button class="btn btn-outline-secondary" onclick="voirDetails(@produit.Id)">
                                         <i class="fas fa-info-circle me-2"></i>Détails
                                     </button>

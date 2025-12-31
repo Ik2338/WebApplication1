@@ -63,7 +63,7 @@ builder.Services.AddAuthorization();
 // 4. AJOUTER HTTP CONTEXT ACCESSOR (important pour le layout)
 builder.Services.AddHttpContextAccessor();
 
-// 5. SESSION (optionnel, pour stocker des données temporaires)
+// 5. SESSION (pour stocker des données temporaires)
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -84,6 +84,9 @@ builder.Services.Configure<RouteOptions>(options =>
 
 // 8. ENREGISTRER LES CATÉGORIES COMME SERVICE SINGLETON
 builder.Services.AddSingleton<string[]>(categoriesDisponibles);
+// Ajoute l'accès aux services HTTP et ton nouveau service Gemini
+builder.Services.AddHttpClient<GeminiService>();
+builder.Services.AddScoped<GeminiService>();
 
 var app = builder.Build();
 
@@ -107,7 +110,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Session (si activé)
+// Session (UNE SEULE FOIS)
 app.UseSession();
 
 // Middleware pour rendre les catégories disponibles dans le contexte
